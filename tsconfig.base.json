@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@ai-travel/apis": ["libs/apis/src/index.ts"],
+      "@ai-travel/models": ["libs/models/src/index.ts"],
+      "wc_react_remote/Module": ["apps/wc-react-remote/src/remote-entry.tsx"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

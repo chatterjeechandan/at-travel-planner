@@ -1,5 +1,5 @@
 {
-  "name": "ng-shell",
+  "name": "wc-ng-shell",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "app",
@@ -7,7 +7,7 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser",
+      "executor": "@nx/angular:webpack-browser",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/ng-shell",
@@ -15,14 +15,19 @@
         "main": "apps/ng-shell/src/main.ts",
         "polyfills": ["zone.js"],
         "tsConfig": "apps/ng-shell/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
         "assets": [
           {
             "glob": "**/*",
             "input": "apps/ng-shell/public"
           }
         ],
-        "styles": ["apps/ng-shell/src/styles.scss"]
+        "styles": [
+          "apps/ng-shell/src/styles.css"
+        ],
+        "scripts": [],
+        "customWebpackConfig": {
+          "path": "apps/ng-shell/webpack.config.ts"
+        }
       },
       "configurations": {
         "production": {
@@ -34,11 +39,14 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "4kb",
-              "maximumError": "8kb"
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "customWebpackConfig": {
+            "path": "apps/ng-shell/webpack.prod.config.ts"
+          }
         },
         "development": {
           "buildOptimizer": false,
@@ -52,14 +60,17 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "continuous": true,
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nx/angular:module-federation-dev-server",
+      "options": {
+        "port": 4200,
+        "publicHost": "http://localhost:4200"
+      },
       "configurations": {
         "production": {
-          "buildTarget": "ng-shell:build:production"
+          "buildTarget": "wc-ng-shell:build:production"
         },
         "development": {
-          "buildTarget": "ng-shell:build:development"
+          "buildTarget": "wc-ng-shell:build:development"
         }
       },
       "defaultConfiguration": "development"
@@ -67,7 +78,7 @@
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "buildTarget": "ng-shell:build"
+        "buildTarget": "wc-ng-shell:build"
       }
     },
     "lint": {
@@ -81,10 +92,10 @@
       }
     },
     "serve-static": {
-      "continuous": true,
       "executor": "@nx/web:file-server",
       "options": {
-        "buildTarget": "ng-shell:build",
+        "buildTarget": "wc-ng-shell:build",
+        "port": 4200,
         "spa": true
       }
     }

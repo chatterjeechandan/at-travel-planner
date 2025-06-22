@@ -1,8 +1,9 @@
 export default {
-  displayName: 'ng-shell',
+  displayName: 'wc-ng-shell',
   preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../coverage/apps/ng-shell',
+  coverageDirectory:
+    '../../../../coverage/apps/ng-shell',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',
