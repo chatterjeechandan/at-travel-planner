@@ -8,7 +8,10 @@ import { firstValueFrom } from 'rxjs';
 })
 export class TravelApiService {
 
-    private openAiKey = (window as any)['OPENAI_API_KEY'] || '';
+    // Import your environment file at the top:
+    // import { environment } from '../../../environments/environment';
+    private openAiKey = ''; // Set your OpenAI API key here or use environment.openAiKey
+    //private openAiKey = ""
 
     constructor(private http: HttpClient) { }
 

@@ -1,5 +1,5 @@
 <div class="travel-container">
-  <h1>AI Travel Planner</h1>
+  <h1>Travel Planner</h1>
 
   <form [formGroup]="travelForm" (ngSubmit)="submit()">
 
@@ -47,4 +47,5 @@
   </form>
 </div>
 
-<react-mfe #reactMfe></react-mfe>
+<react-mfe widget="PlanCard" #planMfe></react-mfe>
+<react-mfe widget="DestinationsGrid" #destinationsMfe></react-mfe>

@@ -7,8 +7,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { GooglePlacesDirective } from './google-places.directive';
-import { TravelApiService } from '@ai-travel/apis';
-import { TravelQuery, TravelPlanResult } from '@ai-travel/models';
+import { MfeBridgeService, TravelApiService } from '@ai-travel/apis';
+import { TravelQuery, TravelPlanResult, Destination } from '@ai-travel/models';
 
 init({
   name: '@module-federation-examples/wc-ng-shell',
@@ -38,16 +38,18 @@ loadRemote('wc_react_remote/Module');
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  title = 'wc-ng-shell';
+  title = 'Travel Planner';
 
-  @ViewChild('reactMfe', { static: false }) reactMfe?: ElementRef;
-
+  @ViewChild('planMfe') planMfe!: ElementRef;
+  @ViewChild('destinationsMfe') destinationsMfe!: ElementRef;
 
   fb = inject(FormBuilder);
-  travelForm: FormGroup;
   travelApi = inject(TravelApiService);
+  mfeBridge = inject(MfeBridgeService);
   aiResult!: TravelPlanResult;
   loading = false;
+  travelForm: FormGroup;
+  popularDestinations: Destination[] = [];
 
   constructor() {
     this.travelForm = this.fb.group({
@@ -61,8 +63,42 @@ export class AppComponent {
     });
   }
 
+  ngAfterViewInit() {
+    this.popularDestinations = [
+      {
+        id: '1',
+        name: 'Bali',
+        image: 'https://picsum.photos/400/300?bali',
+        price: 12000
+      },
+      {
+        id: '2',
+        name: 'Paris',
+        image: 'https://picsum.photos/400/300?paris',
+        price: 25000
+      },
+      {
+        id: '3',
+        name: 'Dubai',
+        image: 'https://picsum.photos/400/300?dubaii',
+        price: 18000
+      },
+       {
+        id: '1',
+        name: 'Bali',
+        image: 'https://picsum.photos/400/300?bali',
+        price: 12000
+      }
+    ];
+    this.mfeBridge.register('PlanCard', this.planMfe.nativeElement);
+    this.mfeBridge.register('DestinationsGrid', this.destinationsMfe.nativeElement);
+    setTimeout(() => {
+      this.mfeBridge.update('DestinationsGrid', { destinations: this.popularDestinations });
+    }, 1000);
+  }
+
   async submit() {
-    if (this.loading) return; // optional double safety
+    if (this.loading) return;
     this.loading = true;
 
     try {
@@ -80,12 +116,7 @@ export class AppComponent {
 
       this.aiResult = await this.travelApi.getTravelPlan(query);
       console.log(this.aiResult);
-
-      if (this.reactMfe) {
-        this.reactMfe.nativeElement.dispatchEvent(
-          new CustomEvent('update-plan', { detail: this.aiResult })
-        );
-      }
+      this.mfeBridge.update('PlanCard', { plan: this.aiResult });
 
     } catch (err) {
       console.error('AI call failed', err);
@@ -96,11 +127,9 @@ export class AppComponent {
 
   onSourcePlaceSelected(place: google.maps.places.PlaceResult) {
     this.travelForm.patchValue({ source: place.formatted_address });
-    console.log('Selected source:', place);
   }
 
   onDestinationPlaceSelected(place: google.maps.places.PlaceResult) {
     this.travelForm.patchValue({ destination: place.formatted_address });
-    console.log('Selected destination:', place);
   }
 }

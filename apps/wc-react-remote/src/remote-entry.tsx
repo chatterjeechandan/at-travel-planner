@@ -1,45 +1,40 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./app/app";
-
-interface AppProps {
-  plan?: any;
-}
+import { WidgetName, WidgetProps } from "@ai-travel/models";
+import { WIDGETS } from "./widgets/widget-mapping";
 
 class ReactMFE extends HTMLElement {
   private root: ReturnType<typeof createRoot>;
-  private _props: AppProps = {};
+  private widget!: WidgetName;
+  private props: WidgetProps[WidgetName] = {} as any;
 
   constructor() {
     super();
     const mountPoint = document.createElement("span");
-    this.attachShadow({ mode: "open" }).appendChild(mountPoint);
+    //this.attachShadow({ mode: "open" }).appendChild(mountPoint);
+    this.appendChild(mountPoint);
     this.root = createRoot(mountPoint);
   }
 
-  connectedEventListeners = () => {
-    this.addEventListener("update-plan", (event: any) => {
-      this._props.plan = event.detail;
-      this.render();
-    });
+  connectedCallback() {
+    const attr = this.getAttribute('widget') as WidgetName | null;
+    if (attr) this.widget = attr;
+    this.render();
+    this.addEventListener("updateProps", this.handleUpdateProps as EventListener);
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener("updateProps", this.handleUpdateProps as EventListener);
+  }
+
+  private handleUpdateProps = (e: CustomEvent<{ props: any }>) => {
+    this.props = e.detail.props;
+    this.render();
   };
 
-  connectedCallback() {
-    this.connectedEventListeners();
-    this.render();
-  }
-
-  set plan(value: any) {
-    this._props.plan = value;
-    this.render();
-  }
-
-  get plan() {
-    return this._props.plan;
-  }
-
   render() {
-    this.root.render(<App {...this._props} />);
+    const Component = WIDGETS[this.widget] || (() => null);
+    this.root.render(<Component {...this.props} />);
   }
 }
 
